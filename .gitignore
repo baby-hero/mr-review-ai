@@ -64,3 +64,6 @@ dmypy.json
 
 # ngrok auth / cache
 .ngrok.*
+
+
+example_data

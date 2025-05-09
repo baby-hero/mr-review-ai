@@ -5,7 +5,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from ai_tools.gemini import get_mr_review
-
+from utils import github_util
 load_dotenv()
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -34,11 +34,10 @@ async def github_webhook(request: Request):
         review_text = get_mr_review(diff)
 
         # Post review to GitHub
-        comment_url = f"https://api.github.com/repos/{owner}/{repo_name}/issues/{pr_number}/comments"
-        requests.post(comment_url,
-                      headers={"Authorization": f"token {GITHUB_TOKEN}"},
-                      json={"body": review_text})
-
-        return {"message": "Review posted"}
+        result = github_util.post_comment_to_pr(owner, repo_name, pr_number, review_text)
+        if result.status_code >= 200 and result.status_code < 300:
+            return {"message": "Review posted"}
+        else:
+            return {"message": f"Failed to post review: {result.text}"}
 
     return {"message": "Event ignored"}
